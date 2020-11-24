@@ -24,9 +24,14 @@ public class Player: MonoBehaviour
 
     public BodyInfo bodyInfo;
 
+    public Inventory pInv;
+
     public bool inMenu;
+    public bool inInv;
 
     public GameObject eyeLobj, eyeRobj;
+
+    public GameObject flashlightObj;
 
     [Header("Body Parts")]
     public Button bFootL, bFootR, bHandL, bHandR, bEyeL, bEyeR;
@@ -56,18 +61,39 @@ public class Player: MonoBehaviour
 
         if (!inMenu)
         {
-            Vector3 move = transform.right * x + transform.forward * z;
-            controller.Move(move * Time.deltaTime * (playerSpeed + (bodyInfo.legTotal - 2) * legPenalty));
+            if (!inInv)
+            {
+                Cursor.visible = false;
+                Vector3 move = transform.right * x + transform.forward * z;
+                controller.Move(move * Time.deltaTime * (playerSpeed + (bodyInfo.legTotal - 2) * legPenalty));
 
-            playerVelocity.y += gravityValue * Time.deltaTime;
-            controller.Move(playerVelocity * Time.deltaTime);
+                playerVelocity.y += gravityValue * Time.deltaTime;
+                controller.Move(playerVelocity * Time.deltaTime);
 
-            Rotate();
+                Rotate();
+            } else
+            {
+                Cursor.visible = true;
+            }
 
             if (Input.GetKeyDown("e"))
             {
                 Interact();
                 Debug.DrawRay(cameraHolder.position, cameraHolder.TransformDirection(Vector3.forward), Color.red, 2);
+            }
+        } else
+        {
+            Cursor.visible = true;
+        } 
+
+        if (Input.GetKeyDown("i"))
+        {
+            if (!inInv)
+            {
+                inInv = true;
+            } else
+            {
+                inInv = false;
             }
         }
     }
@@ -100,6 +126,35 @@ public class Player: MonoBehaviour
                 Debug.Log("Interact");
                 //hit.collider.SendMessageUpwards("YourScriptFunctionHere");
             }
+
+            if (hit.collider.tag.Equals("Item"))
+            {
+                string iName = hit.collider.gameObject.name;
+                int id;
+
+                print("HIT: " + iName);
+
+                if (iName == "Flashlight")
+                {
+                    id = 0;
+                    flashlightObj.SetActive(true);
+                }
+                else if (iName == "Key1(Clone)")
+                {
+                    id = 1;
+                } 
+                else
+                {
+                    id = -1;
+                }
+
+                if (id != -1)
+                {
+                    inInv = true;
+                    pInv.GiveItem(id);
+                    Destroy(hit.collider.gameObject);
+                }
+            }
         }
 
     }
@@ -126,6 +181,18 @@ public class Player: MonoBehaviour
         if (!bodyInfo.eyeR)
         {
             eyeRobj.SetActive(true);
+        }
+    }
+
+    void handHandler()
+    {
+        if (!bodyInfo.handL)
+        {
+            GameObject.Find("/Canvas/InventoryPanel/HandLSlotPanel").SetActive(false);
+        }
+        if (!bodyInfo.handR)
+        {
+            GameObject.Find("/Canvas/InventoryPanel/HandRSlotPanel").SetActive(false);
         }
     }
 
@@ -187,7 +254,7 @@ public class Player: MonoBehaviour
 
         legHandler();
         eyeHandler();
-
+        handHandler();
     }
      void SetBodyImage(Button butt, Image im, Sprite spr)
     {

@@ -12,7 +12,6 @@ public class Inventory : MonoBehaviour
     private void Start()
     {
         uinv = FindObjectOfType<UIInventory>();
-        GiveItem(0);
     }
 
     public void GiveItem(int id)

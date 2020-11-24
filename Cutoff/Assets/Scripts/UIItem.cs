@@ -49,6 +49,7 @@ public class UIItem : MonoBehaviour, IPointerClickHandler
         {
             UpdateItem(selectedItem.item);
             selectedItem.UpdateItem(null);
+            GameObject.Find("Player").GetComponent<Player>().inInv = false;
         }
     }
 }
