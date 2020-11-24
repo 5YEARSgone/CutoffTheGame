@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
 
 public class Player: MonoBehaviour
 {
@@ -19,11 +20,19 @@ public class Player: MonoBehaviour
     public float upLimit = -50;
     public float downLimit = 50;
 
+    public DismemberUI dismemberUI;
 
-    BodyInfo bodyInfo;
+    public BodyInfo bodyInfo;
+
+    public bool inMenu;
 
     public GameObject eyeLobj, eyeRobj;
 
+    [Header("Body Parts")]
+    public Button bFootL, bFootR, bHandL, bHandR, bEyeL, bEyeR;
+    public Image iFootL, iFootR, iHandL, iHandR, iEyeL, iEyeR;
+    public Sprite sFootL, sFootR, sHandL, sHandR, sEyeL, sEyeR;
+    public Sprite xFootL, xFootR, xHandL, xHandR, xEyeL, xEyeR;
     private void Awake()
     {
         bodyInfo.Reset();
@@ -32,7 +41,6 @@ public class Player: MonoBehaviour
     private void Start()
     {
         controller = gameObject.GetComponent<CharacterController>();
-        bodyInfo.legTotal = 0;
     }
 
     void Update()
@@ -46,15 +54,22 @@ public class Player: MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.right * x + transform.forward * z;
-        controller.Move(move * Time.deltaTime * (playerSpeed + (bodyInfo.legTotal - 2) * legPenalty));
-        legHandler();
-        eyeHandler();
+        if (!inMenu)
+        {
+            Vector3 move = transform.right * x + transform.forward * z;
+            controller.Move(move * Time.deltaTime * (playerSpeed + (bodyInfo.legTotal - 2) * legPenalty));
 
-        playerVelocity.y += gravityValue * Time.deltaTime;
-        controller.Move(playerVelocity * Time.deltaTime);
+            playerVelocity.y += gravityValue * Time.deltaTime;
+            controller.Move(playerVelocity * Time.deltaTime);
 
-        Rotate();
+            Rotate();
+
+            if (Input.GetKeyDown("e"))
+            {
+                Interact();
+                Debug.DrawRay(cameraHolder.position, cameraHolder.TransformDirection(Vector3.forward), Color.red, 2);
+            }
+        }
     }
 
 
@@ -70,6 +85,23 @@ public class Player: MonoBehaviour
         if (currentRotation.x > 180) currentRotation.x -= 360;
         currentRotation.x = Mathf.Clamp(currentRotation.x, upLimit, downLimit);
         cameraHolder.localRotation = Quaternion.Euler(currentRotation);
+    }
+
+    void Interact()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(cameraHolder.position, cameraHolder.TransformDirection(Vector3.forward), out hit, 2))
+        {
+            Debug.Log(hit.collider.tag);
+            if (hit.collider.tag.Equals("Machine"))
+            {
+                dismemberUI.gameObject.SetActive(true);
+                inMenu = true;
+                Debug.Log("Interact");
+                //hit.collider.SendMessageUpwards("YourScriptFunctionHere");
+            }
+        }
+
     }
 
     private void legHandler()
@@ -101,8 +133,8 @@ public class Player: MonoBehaviour
     {
         bool earL, earR;
         public bool eyeL, eyeR;
-        bool handL, handR;
-        bool legL, legR;
+        public bool handL, handR;
+        public bool legL, legR;
 
         public int earTotal, eyeTotal, handTotal, legTotal;
 
@@ -125,5 +157,44 @@ public class Player: MonoBehaviour
             UpdateBody();
         }
     }
+    
+    public void UpdateBodyImage()
+    {
+        if (!bodyInfo.eyeL)
+        {
+            SetBodyImage(bEyeL, iEyeL, xEyeL);
+        }
+        if (!bodyInfo.eyeR)
+        {
+            SetBodyImage(bEyeR, iEyeR, xEyeR);
+        }
+        if (!bodyInfo.handR)
+        {
+            SetBodyImage(bHandR, iHandR, xHandR);
+        }
+        if (!bodyInfo.handL)
+        {
+            SetBodyImage(bHandL, iHandL, xHandL);
+        }
+        if (!bodyInfo.legL)
+        {
+            SetBodyImage(bFootL, iFootL, xFootL);
+        }
+        if (!bodyInfo.legR)
+        {
+            SetBodyImage(bFootR, iFootR, xFootR);
+        }
+
+        legHandler();
+        eyeHandler();
+
+    }
+     void SetBodyImage(Button butt, Image im, Sprite spr)
+    {
+        butt.image.sprite = spr;
+        butt.interactable = false;
+        im.sprite = spr;
+    }
+
 }
 
