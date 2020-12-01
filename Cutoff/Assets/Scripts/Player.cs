@@ -188,11 +188,11 @@ public class Player: MonoBehaviour
     {
         if (!bodyInfo.handL)
         {
-            GameObject.Find("/Canvas/InventoryPanel/HandLSlotPanel").SetActive(false);
+            GameObject.Find("/Canvas/InventoryPanel/InventorySlots/HandLSlotPanel").SetActive(false);
         }
         if (!bodyInfo.handR)
         {
-            GameObject.Find("/Canvas/InventoryPanel/HandRSlotPanel").SetActive(false);
+            GameObject.Find("/Canvas/InventoryPanel/InventorySlots/HandRSlotPanel").SetActive(false);
         }
     }
 
