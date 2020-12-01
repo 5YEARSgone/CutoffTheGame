@@ -11,6 +11,12 @@ public class DisableSelf : MonoBehaviour
     public Animator dooran;
     void Disable()
     {
+        if (player.pInv.CheckForItem(0) != null)
+        {
+            player.flashlightObj.SetActive(true);
+        }
+
+        
         GetComponent<Animator>().enabled = false;
     }
 
